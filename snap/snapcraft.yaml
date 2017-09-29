@@ -1,12 +1,46 @@
 name: spark
 version: '1.2.0'
-summary: Spark from Apache Bigtop
+summary: Apache Spark
 description: |
   Apache Spark is a fast and general engine for large-scale data processing.
 
-  This snap installs Spark 2.1.1 from the Apache Bigtop 1.2.0 release.
+  This snap installs Spark 2.1.1 and is compatible with Apache Bigtop 1.2.0.
 grade: devel # must be 'stable' to release into candidate/stable channels
-confinement: strict # use 'strict' once you have the right plugs and slots
+confinement: strict
+
+apps:
+  spark-class:
+    command: wrappers/spark-class
+    plugs:
+      - 'network'
+      - 'network-bind'
+  spark-shell:
+    command: wrappers/spark-shell
+    plugs:
+      - 'network'
+      - 'network-bind'
+  spark-sql:
+    command: wrappers/spark-sql
+    plugs:
+      - 'network'
+      - 'network-bind'
+  spark-submit:
+    command: wrappers/spark-submit
+    plugs:
+      - 'network'
+      - 'network-bind'
+  find-spark-home:
+    command: wrappers/find-spark-home
+  pyspark:
+    command: wrappers/pyspark
+    plugs:
+      - 'network'
+      - 'network-bind'
+  run-example:
+    command: wrappers/run-example
+    plugs:
+      - 'network'
+      - 'network-bind'
 
 plugs:
   home:
@@ -143,15 +177,15 @@ parts:
     source: https://s3.amazonaws.com/jujubigdata/apache/noarch/spark-2.1.1.tar.gz
     plugin: maven
     maven-options:
+      # We need the maven plugin to setup our env, but dont actually care about
+      # the packaged build. Build as fast as we can, leaving the real build for
+      # the install phase.
       - -DskipTests
+      - -Phadoop-provided
+      - -Dprotobuf.version=2.5.0
       - -Dhadoop.version=2.7.3
       - -Dyarn.version=2.7.3
-      - -Dprotobuf.version=2.5.0
-      - -DrecompileMode=all
-      - -Pyarn
-      - -Phadoop-2.7
-      - -Phive
-      - -Phive-thriftserver
+
     prepare: |
       cp ../../bigtop/build/bigtop-snap.bom \
         ../../bigtop/build/bigtop-packages/src/common/spark/bigtop.bom
@@ -169,7 +203,12 @@ parts:
       # adapted from bigtop/bigtop-packages/src/common/spark/do-component-build
       sed -e '/useZincServer/d' -e '/recompileMode/d' -i pom.xml
 
+      # needed to build with java8
       export MAVEN_OPTS="-Xmx2g -XX:ReservedCodeCacheSize=512m"
+
+      # we always want spark to connect/use the hadoop snap; set opt so we dont
+      # build hadoop jars into our assembly
+      export SPARK_BUILD_OPTS=-Phadoop-provided
     install: |
       # Do not define build tasks because we want the maven plugin to setup any
       # proxy config (otherwise, we'd have to grok the env and do it ourselves).
@@ -180,15 +219,25 @@ parts:
 
       # adapted from bigtop/bigtop-packages/src/deb/spark/rules
       ../../bigtop/build/bigtop-packages/src/common/spark/install_spark.sh \
-        --prefix=$SNAPCRAFT_PART_INSTALL \
         --build-dir=. \
-        --source-dir=../../bigtop/build/bigtop-packages/src/common/spark
+        --doc-dir=/usr/share/doc/spark \
+        --source-dir=../../bigtop/build/bigtop-packages/src/common/spark \
+        --prefix=$SNAPCRAFT_PART_INSTALL
+
+      # FIXME: hack a $SNAP_DATA symlink since we cant use $SNAP_DATA during build
+      rm -f $SNAPCRAFT_PART_INSTALL/usr/lib/spark/conf
+      ln -s /var/snap/spark/current/etc/spark/conf $SNAPCRAFT_PART_INSTALL/usr/lib/spark/conf
+      rm -f $SNAPCRAFT_PART_INSTALL/usr/lib/spark/conf
+      ln -s /var/snap/spark/common/var/run/spark/work $SNAPCRAFT_PART_INSTALL/usr/lib/spark/work
 
       # create dirs for potential slot contents
+      install -d -m 0755 $SNAPCRAFT_PART_INSTALL/hadoop
       install -d -m 0755 $SNAPCRAFT_PART_INSTALL/zookeeper
     stage:
-      - bin/*
-      - usr/*
+      - etc/spark
+      - hadoop
+      - usr/lib/spark
+      - zookeeper
   wrappers:
     after:
       - spark
