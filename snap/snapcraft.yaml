@@ -41,6 +41,11 @@ apps:
     plugs:
       - 'network'
       - 'network-bind'
+  spark-daemon-wrapper:
+    command: wrappers/spark-daemon-wrapper.sh
+    plugs:
+      - 'network'
+      - 'network-bind'
 
 plugs:
   home:
@@ -185,7 +190,8 @@ parts:
       - -Dprotobuf.version=2.5.0
       - -Dhadoop.version=2.7.3
       - -Dyarn.version=2.7.3
-
+    stage-packages:
+      - coreutils
     prepare: |
       cp ../../bigtop/build/bigtop-snap.bom \
         ../../bigtop/build/bigtop-packages/src/common/spark/bigtop.bom
@@ -227,7 +233,7 @@ parts:
       # FIXME: hack a $SNAP_DATA symlink since we cant use $SNAP_DATA during build
       rm -f $SNAPCRAFT_PART_INSTALL/usr/lib/spark/conf
       ln -s /var/snap/spark/current/etc/spark/conf $SNAPCRAFT_PART_INSTALL/usr/lib/spark/conf
-      rm -f $SNAPCRAFT_PART_INSTALL/usr/lib/spark/conf
+      rm -f $SNAPCRAFT_PART_INSTALL/usr/lib/spark/work
       ln -s /var/snap/spark/common/var/run/spark/work $SNAPCRAFT_PART_INSTALL/usr/lib/spark/work
 
       # create dirs for potential slot contents
@@ -236,6 +242,7 @@ parts:
     stage:
       - etc/spark
       - hadoop
+      - usr/bin
       - usr/lib/spark
       - zookeeper
   wrappers:
