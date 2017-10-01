@@ -48,19 +48,19 @@ else
   DAEMON_PID=${SNAP_DATA}/var/run/spark/spark-$COMMAND.pid
   case $COMMAND in
     history-server)
-      exec nohup ${SNAP/wrappers/spark-class org.apache.spark.deploy.history.HistoryServer \
+      exec nohup ${SNAP}/wrappers/spark-class org.apache.spark.deploy.history.HistoryServer \
         "$@" > $DAEMON_LOG 2>&1 &
       echo $! > $DAEMON_PID
     master)
       if [ "$SPARK_MASTER_IP" = "" ]; then
         SPARK_MASTER_IP=`hostname`
       fi
-      exec nohup ${SNAP/wrappers/spark-class org.apache.spark.deploy.master.Master \
+      exec nohup ${SNAP}/wrappers/spark-class org.apache.spark.deploy.master.Master \
         --ip $SPARK_MASTER_IP "$@" > $DAEMON_LOG 2>&1 &
       echo $! > $DAEMON_PID
       ;;
     worker)
-      exec nohup ${SNAP/wrappers/spark-class org.apache.spark.deploy.worker.Worker \
+      exec nohup ${SNAP}/wrappers/spark-class org.apache.spark.deploy.worker.Worker \
         $SPARK_MASTER_URL "$@" > $DAEMON_LOG 2>&1 &
       echo $! > $DAEMON_PID
     *)
