@@ -45,7 +45,7 @@ else
   # Run the daemon script, adapted from ./bigtop-packages/src/common/spark/*.svc
   . ${SPARK_CONF_DIR}/spark-env.sh
   DAEMON_LOG=${SNAP_DATA}/var/log/spark/spark-$COMMAND.out
-  DAEMON_PID=${SNAP_DATA}/var/run/spark/spark-$COMMAND.pid
+  DAEMON_PID=${SNAP_COMMON}/var/run/spark/spark-$COMMAND.pid
   case $COMMAND in
     history-server)
       exec nohup ${SNAP}/wrappers/spark-class org.apache.spark.deploy.history.HistoryServer \

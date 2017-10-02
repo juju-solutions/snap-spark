@@ -30,7 +30,7 @@ if [ ! -e ${SPARK_CONF_DIR} ]; then
     cp ${SPARK_CONF_DIR}/spark-defaults.conf.template ${SPARK_CONF_DIR}/spark-defaults.conf
   fi
   # location must be writable by everyone
-  mkdir -p ${SNAP_DATA}/derby && chmod 777 ${SNAP_DATA}/derby
-  echo "spark.driver.extraJavaOptions -Dderby.system.home=${SNAP_DATA}/derby" >> \
+  mkdir -p ${SNAP_COMMON}/derby && chmod 777 ${SNAP_COMMON}/derby
+  echo "spark.driver.extraJavaOptions -Dderby.system.home=${SNAP_COMMON}/derby" >> \
     ${SPARK_CONF_DIR}/spark-defaults.conf
 fi
