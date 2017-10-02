@@ -51,6 +51,7 @@ else
       exec nohup ${SNAP}/wrappers/spark-class org.apache.spark.deploy.history.HistoryServer \
         "$@" > $DAEMON_LOG 2>&1 &
       echo $! > $DAEMON_PID
+      ;;
     master)
       if [ "$SPARK_MASTER_IP" = "" ]; then
         SPARK_MASTER_IP=`hostname`
@@ -63,6 +64,7 @@ else
       exec nohup ${SNAP}/wrappers/spark-class org.apache.spark.deploy.worker.Worker \
         $SPARK_MASTER_URL "$@" > $DAEMON_LOG 2>&1 &
       echo $! > $DAEMON_PID
+      ;;
     *)
       echo "ERROR: $COMMAND is not recognized"
       exit 1
