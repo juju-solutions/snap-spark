@@ -7,7 +7,7 @@
 # Verify args
 if [ $# -lt 2 ]; then
   echo "ERROR: Missing required arguments:"
-  echo "$0 <start|stop> <master|worker|history-server> <args...>"
+  echo "$0 <start|stop> <history-server|master|worker> <args...>"
   exit 1
 else
   STARTSTOP=$1
@@ -31,39 +31,28 @@ else
   exit 1
 fi
 
-# Daemon uses nohup; set path to prefer the bins packed into the snap
-export PATH=${SNAP}/usr/bin:$PATH
+# Export daemon (root) writable locations
+export SPARK_CONF_DIR=${SNAP_DATA}/etc/spark/conf
+export SPARK_LOG_DIR=${SNAP_DATA}/var/log/spark
+export SPARK_PID_DIR=${SNAP_COMMON}/var/run/spark
+
+# Daemon uses chown and nohup; set path to prefer the bins packed into the snap
+export PATH=${SNAP}/bin:${SNAP}/usr/bin:$PATH
 
 # All spark daemons require config; check for that.
-SPARK_CONF_DIR=${SNAP_DATA}/etc/spark/conf
 if [ ! -e ${SPARK_CONF_DIR} ]; then
   echo "WARN: Expected Spark configuration not found:"
   echo "${SPARK_CONF_DIR}"
   echo "Daemon cannot be started until config is present."
   exit 0
 else
-  # Run the daemon script, adapted from ./bigtop-packages/src/common/spark/*.svc
-  . ${SPARK_CONF_DIR}/spark-env.sh
-  DAEMON_LOG=${SNAP_DATA}/var/log/spark/spark-$COMMAND.out
-  DAEMON_PID=${SNAP_COMMON}/var/run/spark/spark-$COMMAND.pid
+  # Run the daemon script
   case $COMMAND in
-    history-server)
-      exec nohup ${SNAP}/wrappers/spark-class org.apache.spark.deploy.history.HistoryServer \
-        "$@" > $DAEMON_LOG 2>&1 &
-      echo $! > $DAEMON_PID
-      ;;
-    master)
-      if [ "$SPARK_MASTER_IP" = "" ]; then
-        SPARK_MASTER_IP=`hostname`
-      fi
-      exec nohup ${SNAP}/wrappers/spark-class org.apache.spark.deploy.master.Master \
-        --ip $SPARK_MASTER_IP "$@" > $DAEMON_LOG 2>&1 &
-      echo $! > $DAEMON_PID
+    history-server|master)
+      exec ${SPARK_HOME}/sbin/${STARTSTOP}-${COMMAND}.sh
       ;;
     worker)
-      exec nohup ${SNAP}/wrappers/spark-class org.apache.spark.deploy.worker.Worker \
-        $SPARK_MASTER_URL "$@" > $DAEMON_LOG 2>&1 &
-      echo $! > $DAEMON_PID
+      exec ${SPARK_HOME}/sbin/${STARTSTOP}-slave.sh
       ;;
     *)
       echo "ERROR: $COMMAND is not recognized"
