@@ -7,8 +7,8 @@
 # Setup environment
 # NB: all snaps that plug into hadoop are expected to have $SNAP/hadoop and
 # $SNAP_DATA/etc/hadoop dirs that will be automatically mounted when connected.
-if [ -e ${SNAP}/hadoop/wrappers/common-wrapper.sh ]; then
-  . ${SNAP}/hadoop/wrappers/common-wrapper.sh
+if [ -e ${SNAP}/hadoop/wrappers/hadoop-common-wrapper.sh ]; then
+  . ${SNAP}/hadoop/wrappers/hadoop-common-wrapper.sh
 
   # Update path so spark can find $SNAP/hadoop/wrappers (like 'hadoop')
   export PATH=${SNAP}/hadoop/wrappers:$PATH
