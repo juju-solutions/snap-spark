@@ -46,6 +46,27 @@ apps:
     plugs:
       - 'network'
       - 'network-bind'
+  spark-history-server:
+    command: wrappers/spark-daemon-wrapper.sh start history-server
+    stop-command: wrappers/spark-daemon-wrapper.sh stop history-server
+    daemon: forking
+    plugs:
+      - 'network'
+      - 'network-bind'
+  spark-master:
+    command: wrappers/spark-daemon-wrapper.sh start master
+    stop-command: wrappers/spark-daemon-wrapper.sh stop master
+    daemon: forking
+    plugs:
+      - 'network'
+      - 'network-bind'
+  spark-worker:
+    command: wrappers/spark-daemon-wrapper.sh start worker
+    stop-command: wrappers/spark-daemon-wrapper.sh stop worker
+    daemon: forking
+    plugs:
+      - 'network'
+      - 'network-bind'
 
 plugs:
   home:
@@ -192,6 +213,7 @@ parts:
       - -Dyarn.version=2.7.3
     stage-packages:
       - coreutils
+      - util-linux
     prepare: |
       cp ../../bigtop/build/bigtop-snap.bom \
         ../../bigtop/build/bigtop-packages/src/common/spark/bigtop.bom
