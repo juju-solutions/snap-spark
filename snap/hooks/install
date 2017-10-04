@@ -2,11 +2,11 @@
 
 set -eux
 
-# setup worker dirs, not versioned
+# setup worker/pid dirs, not versioned
 mkdir -p ${SNAP_COMMON}/var/run/spark/work
 
-# setup log dirs, versioned
-mkdir -p ${SNAP_DATA}/var/log/spark
+# setup log/history dirs, versioned
+mkdir -p ${SNAP_DATA}/var/log/spark/apps
 
 # setup spark config, versioned
 mkdir -p ${SNAP_DATA}/etc/spark
@@ -17,13 +17,8 @@ SPARK_CONF_DIR=${SNAP_DATA}/etc/spark/conf
 if [ ! -e ${SPARK_CONF_DIR} ]; then
   ln -s conf.dist ${SPARK_CONF_DIR}
 
-  # set config to work with SNAP[_DATA|_COMMON]
-  sed -e 's|${SPARK_HOME:-/usr/lib/spark}|${SPARK_HOME:-$SNAP/usr/lib/spark}|' \
-      -e 's|${SPARK_LOG_DIR:-/var/log/spark}|${SPARK_LOG_DIR:-$SNAP_DATA/var/log/spark}|' \
-      -e 's|${HADOOP_HOME:-/usr/lib/hadoop}|${HADOOP_HOME:-$SNAP/hadoop/usr/lib/hadoop}|' \
-      -e 's|${HADOOP_CONF_DIR:-/etc/hadoop/conf}|${HADOOP_CONF_DIR:-$SNAP_DATA/etc/hadoop/conf}|' \
-      -e 's|${SPARK_WORKER_DIR:-/var/run/spark/work}|${SPARK_WORKER_DIR:-$SNAP_COMMON/var/run/spark/work}|' \
-      -i ${SPARK_CONF_DIR}/spark-env.sh
+  # use our spark-env that understands SNAP[_DATA|_COMMON]
+  cp ${SPARK}/snap/sources/spark-env.sh ${SPARK_CONF_DIR}
 
   # setup derby metastore location
   if [ ! -e ${SPARK_CONF_DIR}/spark-defaults.conf ]; then

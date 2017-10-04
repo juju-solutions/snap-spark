@@ -2,6 +2,9 @@
 
 set -eux
 
-# setup root-writable versioned dirs
+# ensure root-writable versioned dirs are present
 mkdir -p ${SNAP_DATA}/etc/hadoop
+mkdir -p ${SNAP_DATA}/etc/spark
+mkdir -p ${SNAP_DATA}/etc/zookeeper
 mkdir -p ${SNAP_DATA}/var/lib/bigtop
+mkdir -p ${SNAP_DATA}/var/log/spark/apps
