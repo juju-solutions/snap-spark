@@ -18,7 +18,7 @@ if [ ! -e ${SPARK_CONF_DIR} ]; then
   ln -s conf.dist ${SPARK_CONF_DIR}
 
   # use our spark-env that understands SNAP[_DATA|_COMMON]
-  cp ${SPARK}/snap/sources/spark-env.sh ${SPARK_CONF_DIR}
+  cp ${SNAP}/snap/sources/spark-env.sh ${SPARK_CONF_DIR}
 
   # setup derby metastore location
   if [ ! -e ${SPARK_CONF_DIR}/spark-defaults.conf ]; then
