@@ -46,6 +46,8 @@ if [ ! -e ${SPARK_CONF_DIR} ]; then
   echo "Daemon cannot be started until config is present."
   exit 0
 else
+  . ${SPARK_CONF_DIR}/spark-env.sh
+
   # Run the daemon script
   case $COMMAND in
     history-server|master)
