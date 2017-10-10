@@ -54,7 +54,7 @@ else
       exec ${SPARK_HOME}/sbin/${STARTSTOP}-${COMMAND}.sh
       ;;
     worker)
-      exec ${SPARK_HOME}/sbin/${STARTSTOP}-slave.sh
+      exec ${SPARK_HOME}/sbin/${STARTSTOP}-slave.sh ${SPARK_MASTER_URL}
       ;;
     *)
       echo "ERROR: $COMMAND is not recognized"
